@@ -105,7 +105,15 @@ class ComplexType extends Type
 
             $comment = new PhpDocComment();
             $comment->setVar(PhpDocElementFactory::getVar($type, $name, ''));
-            $var = new PhpVariable('protected', $name, 'null', $comment);
+
+
+            $initialValue = 'null';
+
+            if (get_class($this) === ArrayType::class) {
+                $initialValue = '[]';
+            }
+
+            $var = new PhpVariable('protected', $name, $initialValue, $comment);
             $this->class->addVariable($var);
 
             if (!$member->getNullable()) {

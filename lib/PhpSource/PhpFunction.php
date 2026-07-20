@@ -31,19 +31,26 @@ class PhpFunction extends PhpElement
     private $comment;
 
     /**
+     * @var string|null Native return type declaration (without the leading colon), or null for none
+     */
+    private $returnType;
+
+    /**
      * @param string        $access
      * @param string        $identifier
      * @param string        $params
      * @param string        $source
      * @param PhpDocComment $comment
+     * @param string|null   $returnType Native return type (e.g. 'bool', 'void', 'mixed'), without the leading colon
      */
-    public function __construct($access, $identifier, $params, $source, PhpDocComment $comment = null)
+    public function __construct($access, $identifier, $params, $source, PhpDocComment $comment = null, $returnType = null)
     {
         $this->access     = $access;
         $this->identifier = $identifier;
         $this->params     = $params;
         $this->source     = $source;
         $this->comment    = $comment;
+        $this->returnType = $returnType;
     }
 
     /**
@@ -57,7 +64,8 @@ class PhpFunction extends PhpElement
             $ret .= $this->getSourceRow($this->comment->getSource());
         }
 
-        $ret .= $this->getSourceRow($this->access.' function '.$this->identifier.'('.$this->params.')');
+        $returnTypeDeclaration = ($this->returnType !== null) ? ': '.$this->returnType : '';
+        $ret .= $this->getSourceRow($this->access.' function '.$this->identifier.'('.$this->params.')'.$returnTypeDeclaration);
         $ret .= $this->getSourceRow('{');
         $ret .= $this->getSourceRow($this->source);
         $ret .= $this->getSourceRow('}');

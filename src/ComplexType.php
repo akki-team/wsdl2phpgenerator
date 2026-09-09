@@ -293,7 +293,7 @@ class ComplexType extends Type
         foreach ($parameters as $name => $type) {
             $parameterString = '$'.$name;
             if (!empty($type) && $includeType) {
-                $parameterString = $type.' '.$parameterString;
+                $parameterString = self::nullableType($type, $defaultNull).' '.$parameterString;
             }
             if ($defaultNull) {
                 $parameterString .= ' = null';
@@ -302,6 +302,30 @@ class ComplexType extends Type
         }
 
         return implode(', ', $parameterStrings);
+    }
+
+    /**
+     * Rend un type explicitement nullable lorsque le parametre vaut null par defaut.
+     *
+     * PHP 8.4 deprecie le nullable implicite : `array $x = null` doit s'ecrire `?array $x = null`.
+     * Les types unions ne se prefixent pas, ils recoivent `|null` ; `mixed` accepte deja null.
+     *
+     * @param string $type       le type declare
+     * @param bool   $defaultNull si le parametre vaut null par defaut
+     *
+     * @return string le type, rendu nullable si necessaire
+     */
+    private static function nullableType($type, $defaultNull)
+    {
+        if (!$defaultNull || '?' === $type[0] || 'mixed' === strtolower($type)) {
+            return $type;
+        }
+
+        if (false !== strpos($type, '|')) {
+            return preg_match('/(^|\\|)null(\\||$)/i', $type) ? $type : $type.'|null';
+        }
+
+        return '?'.$type;
     }
 
     /**
